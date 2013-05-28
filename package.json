@@ -1,0 +1,21 @@
+{
+  "name": "collabjams",
+  "version": "0.0.0",
+  "description": "ERROR: No README.md file found!",
+  "main" : "server.js",
+  "dependencies": {
+    "express": "~3.1.0",
+    "jade": "*",
+    "stylus": "*",
+    "coffee-script": "~1.5.0",
+    "underscore": "~1.4.1",
+    "underscore.string": "~2.3.0",
+    "connect-assets": "~2.3.3",
+    "socket.io": "*",
+    "get-youtube-id": "*",
+    "youtube-feeds": "*"
+  },
+  "repository": "",
+  "author": "",
+  "license": "BSD"
+}
