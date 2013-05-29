@@ -34,17 +34,8 @@ sockets.on "connection", (socket) ->
 
   sockets.emit 'updateplaylist', playlist
 
-  socket.on "chat", updateChat
-
-  socket.on "adduser", (username) ->
-    socket.username = username
-    if(Object.keys(usernames).length == 0)
-      master = socket.id
-      socket.master = true
-    usernames[username] = username
-    socket.emit 'updatechat', 'Playlist', 'you have connected'
-    socket.broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
-    sockets.emit 'updateusers', usernames
+  socket.on "chat",    updateChat
+  socket.on "adduser", addUser
 
   socket.on "playlist", (song) ->
     id = getNameAndId song
@@ -72,8 +63,21 @@ sockets.on "connection", (socket) ->
 updateChat = (data) ->
   sockets.emit 'updatechat', @username, data
 
+setMaster = (socket) ->
+  master = socket.id
+  socket.master = true
 
+isFirstUser = ->
+  Object.keys(usernames).length == 0
 
+addUser = (username) ->
+  @username = username
+  setMaster(this) if isFirstUser()
+  usernames[username] = username
+
+  @emit 'updatechat', 'Playlist', 'you have connected'
+  @broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
+  sockets.emit 'updateusers', usernames
 
 
 console.log "listening on port " + port
