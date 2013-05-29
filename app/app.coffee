@@ -1,36 +1,36 @@
-express = require "express"
-getYouTubeID = require "get-youtube-id"
-youtube = require "youtube-feeds"
+express = require 'express'
+getYouTubeID = require 'get-youtube-id'
+youtube = require 'youtube-feeds'
 app = express()
 port = 3000
-app.set "views", __dirname + "/views"
-app.set "view engine", "jade"
-app.engine "jade", require("jade").__express
+app.set 'views', "#{ __dirname  }/views"
+app.set 'view engine', 'jade'
+app.engine 'jade', require('jade').__express
 
-app.get "/", (req, res) ->
-  res.render "chatroom"
+app.get '/', (req, res) ->
+  res.render 'chatroom'
 
-app.use express.static(__dirname + "/public")
+app.use express.static("#{ __dirname }/public")
 
 usernames = {}
 playlist = {}
-master = ""
+master = ''
 
-io = require("socket.io").listen(app.listen(port))
+io = require('socket.io').listen(app.listen(port))
 
 sockets = io.sockets
 
-sockets.on "connection", (socket) ->
+sockets.on 'connection', (socket) ->
 
   sockets.emit 'updateplaylist', playlist
 
-  socket.on "adduser",                addUser
-  socket.on "playlist",               addSong
-  socket.on "chat",                   updateChat
-  socket.on "disconnect",             disconnect
-  socket.on "enque",                  enqueFirstSong
-  socket.on "sync",                   syncPlayback
-  socket.on "mastersocketplayerdata", syncPlaybackForAllUsers
+  socket.on 'adduser',                addUser
+  socket.on 'playlist',               addSong
+  socket.on 'chat',                   updateChat
+  socket.on 'disconnect',             disconnect
+  socket.on 'enque',                  enqueFirstSong
+  socket.on 'sync',                   syncPlayback
+  socket.on 'mastersocketplayerdata', syncPlaybackForAllUsers
 
 updateChat = (data) ->
   sockets.emit 'updatechat', @username, data
@@ -54,7 +54,7 @@ addUser = (username) ->
 disconnect = ->
   delete usernames[@username]
   sockets.emit 'updateusers', usernames
-  @broadcast.emit 'updatechat', 'Playlist', @username + ' has disconnected'
+  @broadcast.emit 'updatechat', 'Playlist', "#{@username} has disconnected"
 
 addSong = (song) ->
   id = getYouTubeID(song)
@@ -69,9 +69,9 @@ enqueFirstSong = ->
 
 syncPlayback = ->
   if @id != master
-    sockets.socket(master).emit("getcurrentsongdata")
+    sockets.socket(master).emit('getcurrentsongdata')
 
 syncPlaybackForAllUsers = (id, time) ->
   @broadcast.emit 'syncallusers', id, time
 
-console.log "listening on port " + port
+console.log "listening on port #{port}"
