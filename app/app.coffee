@@ -28,12 +28,15 @@ master = ""
 
 io = require("socket.io").listen(app.listen(port))
 
-io.sockets.on "connection", (socket) ->
+sockets = io.sockets
 
-  io.sockets.emit 'updateplaylist', playlist
+
+sockets.on "connection", (socket) ->
+
+  sockets.emit 'updateplaylist', playlist
 
   socket.on "chat", (data) ->
-    io.sockets.emit 'updatechat', socket.username, data
+    sockets.emit 'updatechat', socket.username, data
 
   socket.on "adduser", (username) ->
     socket.username = username
@@ -43,7 +46,7 @@ io.sockets.on "connection", (socket) ->
     usernames[username] = username
     socket.emit 'updatechat', 'Playlist', 'you have connected'
     socket.broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
-    io.sockets.emit 'updateusers', usernames
+    sockets.emit 'updateusers', usernames
 
   socket.on "playlist", (song) ->
     id = getNameAndId song
@@ -51,21 +54,21 @@ io.sockets.on "connection", (socket) ->
       playlist[id] = id
       socket.emit 'updatechat', 'Playlist', "You added #{id} to the playlist"
       socket.broadcast.emit 'updatechat', 'Playlist', "#{socket.username} added #{id} to the playlist"
-      io.sockets.emit 'updateplaylist', playlist
+      sockets.emit 'updateplaylist', playlist
 
   socket.on 'enque', () ->
     socket.emit 'enquefirstsong'
 
   socket.on 'sync', () ->
     if(socket.id != master)
-      io.sockets.socket(master).emit("getcurrentsongdata");
+      sockets.socket(master).emit("getcurrentsongdata");
 
   socket.on "mastersocketplayerdata", (id, time) ->
     socket.broadcast.emit 'syncallusers', id, time
 
   socket.on "disconnect", () ->
     delete usernames[socket.username]
-    io.sockets.emit 'updateusers', usernames
+    sockets.emit 'updateusers', usernames
     socket.broadcast.emit 'updatechat', 'Playlist', socket.username + ' has disconnected'
 
 
