@@ -27,9 +27,7 @@ sockets.on "connection", (socket) ->
   socket.on "chat",     updateChat
   socket.on "adduser",  addUser
   socket.on "playlist", addSong
-
-  socket.on 'enque', () ->
-    socket.emit 'enquefirstsong'
+  socket.on "enque",    enqueFirstSong
 
   socket.on 'sync', () ->
     if(socket.id != master)
@@ -69,5 +67,8 @@ addSong = (song) ->
     @emit 'updatechat', 'Playlist', "You added #{id} to the playlist"
     @broadcast.emit 'updatechat', 'Playlist', "#{@username} added #{id} to the playlist"
     sockets.emit 'updateplaylist', playlist
+
+enqueFirstSong = ->
+  @emit 'enquefirstsong'
 
 console.log "listening on port " + port
