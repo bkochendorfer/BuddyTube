@@ -28,10 +28,7 @@ sockets.on "connection", (socket) ->
   socket.on "adduser",  addUser
   socket.on "playlist", addSong
   socket.on "enque",    enqueFirstSong
-
-  socket.on 'sync', () ->
-    if(socket.id != master)
-      sockets.socket(master).emit("getcurrentsongdata");
+  socket.on "sync",     syncPlayback
 
   socket.on "mastersocketplayerdata", (id, time) ->
     socket.broadcast.emit 'syncallusers', id, time
@@ -70,5 +67,9 @@ addSong = (song) ->
 
 enqueFirstSong = ->
   @emit 'enquefirstsong'
+
+syncPlayback = ->
+  if @id != master
+    sockets.socket(master).emit("getcurrentsongdata")
 
 console.log "listening on port " + port
