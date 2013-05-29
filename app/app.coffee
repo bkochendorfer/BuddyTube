@@ -21,22 +21,25 @@ getNameAndId = (song) ->
   # console.log json
   # console.log "name is #{JSON.stringify(json)}"
 
-#Socket.io
+
 usernames = {}
 playlist = {}
+master = ""
 
 io = require("socket.io").listen(app.listen(port))
 
 io.sockets.on "connection", (socket) ->
+
   io.sockets.emit 'updateplaylist', playlist
-  socket.emit "message",
-    message: "Share your jams and chat about them"
 
   socket.on "chat", (data) ->
     io.sockets.emit 'updatechat', socket.username, data
 
   socket.on "adduser", (username) ->
     socket.username = username
+    if(Object.keys(usernames).length == 0)
+      master = socket.id
+      socket.master = true
     usernames[username] = username
     socket.emit 'updatechat', 'Playlist', 'you have connected'
     socket.broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
@@ -52,6 +55,13 @@ io.sockets.on "connection", (socket) ->
 
   socket.on 'enque', () ->
     socket.emit 'enquefirstsong'
+
+  socket.on 'sync', () ->
+    if(socket.id != master)
+      io.sockets.socket(master).emit("getcurrentsongdata");
+
+  socket.on "mastersocketplayerdata", (id, time) ->
+    socket.broadcast.emit 'syncallusers', id, time
 
   socket.on "disconnect", () ->
     delete usernames[socket.username]

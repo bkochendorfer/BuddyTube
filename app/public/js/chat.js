@@ -5,7 +5,10 @@ window.onload = function() {
     socket.on('connect', function() {
       socket.emit('adduser', prompt("Hi, who's there?"))
       socket.emit('updateplaylist')
-      socket.emit('enque')
+      if (!$("#player").is(":visible")) {
+        socket.emit('enque')
+      }
+      socket.emit('sync')
     });
 
     socket.on('updatechat', function (username, data) {
@@ -25,19 +28,30 @@ window.onload = function() {
       $('#queue').empty();
       $.each(data, function(key, value) {
         $('#queue').append('<div>' + key + '</div>');
-        jQuery("#player").tubeplayer("play", key);
       });
       if(! $('#queue').is(':empty')) {
         $('#player').show();
+        if($('#queue').children().size() == 1){
+          socket.emit('enque');
+        }
       }
     });
 
     socket.on('enquefirstsong', function(data) {
-      // This doesn't work
-      // var thingy = $('#queue').children(":first").html()
-      // console.log(thingy)
-      // console.log(jQuery("#player").tubeplayer("play", thingy));
-      // $('#player iframe').onload = function(){ jQuery("#player").tubeplayer("play", $('#queue').children(":first").html()) };
+      inQueue = $('#queue').children(":first").html()
+      setTimeout(function(){
+        jQuery("#player").tubeplayer("play", inQueue)
+      },1000);
+    });
+
+    socket.on('getcurrentsongdata', function(data){
+      id = jQuery("#player").tubeplayer('data').videoID
+      time = jQuery("#player").tubeplayer('data').currentTime
+      socket.emit('mastersocketplayerdata', id, time);
+    });
+
+    socket.on('syncallusers', function(id,time) {
+      jQuery("#player").tubeplayer("play", {id: id,time:time});
     });
 
     $('#send').click( function() {
@@ -56,6 +70,35 @@ window.onload = function() {
         $(this).blur();
         $('#send').focus().click();
         $('#data').focus();
+      }
+    });
+
+    playNextSong = function() {
+      currentSong = jQuery("#player").tubeplayer('data').videoID;
+      nextSong = $("#queue div:contains('" + currentSong+ "')").next().html()
+      if(nextSong == null){
+        jQuery("#player").tubeplayer('stop');
+      }
+      else {
+        jQuery("#player").tubeplayer("play", nextSong);
+      }
+    };
+
+    jQuery("#player").tubeplayer({
+      allowFullScreen: "false",
+      initialVideo: "",
+      showControls: false,
+      autoPlay: false,
+      autoHide: true,
+      preferredQuality: "default",
+      onPlay: function(id){},
+      onPause: function(){},
+      onStop: function(){},
+      onSeek: function(time){},
+      onMute: function(){},
+      onUnMute: function(){},
+      onPlayerEnded: function(){
+        playNextSong();
       }
     });
 

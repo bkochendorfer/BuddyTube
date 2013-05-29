@@ -22,19 +22,3 @@ html
       input.data#data(style='width:350px;')
       input.send#send(type='button', value='send')
     #player(style='display:none;')
-    script.
-      jQuery("#player").tubeplayer({
-        allowFullScreen: "false",
-        initialVideo: "",
-        showControls: "",
-        autoPlay: true,
-        autoHide: true,
-        preferredQuality: "default",
-        onPlay: function(id){},
-        onPause: function(){},
-        onStop: function(){},
-        onSeek: function(time){},
-        onMute: function(){},
-        onUnMute: function(){},
-        onPlayerEnded: function(){}
-      });
