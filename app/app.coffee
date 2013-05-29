@@ -12,16 +12,6 @@ app.get "/", (req, res) ->
 
 app.use express.static(__dirname + "/public")
 
-#Manipulate data
-getNameAndId = (song) ->
-  id = getYouTubeID song
-  # console.log "id is #{id}"
-  # youtube.video(id, data)
-
-  # console.log json
-  # console.log "name is #{JSON.stringify(json)}"
-
-
 usernames = {}
 playlist = {}
 master = ""
@@ -34,16 +24,9 @@ sockets.on "connection", (socket) ->
 
   sockets.emit 'updateplaylist', playlist
 
-  socket.on "chat",    updateChat
-  socket.on "adduser", addUser
-
-  socket.on "playlist", (song) ->
-    id = getNameAndId song
-    if (playlist[id] == undefined)
-      playlist[id] = id
-      socket.emit 'updatechat', 'Playlist', "You added #{id} to the playlist"
-      socket.broadcast.emit 'updatechat', 'Playlist', "#{socket.username} added #{id} to the playlist"
-      sockets.emit 'updateplaylist', playlist
+  socket.on "chat",     updateChat
+  socket.on "adduser",  addUser
+  socket.on "playlist", addSong
 
   socket.on 'enque', () ->
     socket.emit 'enquefirstsong'
@@ -79,5 +62,12 @@ addUser = (username) ->
   @broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
   sockets.emit 'updateusers', usernames
 
+addSong = (song) ->
+  id = getYouTubeID(song)
+  if (playlist[id] == undefined)
+    playlist[id] = id
+    @emit 'updatechat', 'Playlist', "You added #{id} to the playlist"
+    @broadcast.emit 'updatechat', 'Playlist', "#{@username} added #{id} to the playlist"
+    sockets.emit 'updateplaylist', playlist
 
 console.log "listening on port " + port
