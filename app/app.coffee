@@ -30,13 +30,11 @@ io = require("socket.io").listen(app.listen(port))
 
 sockets = io.sockets
 
-
 sockets.on "connection", (socket) ->
 
   sockets.emit 'updateplaylist', playlist
 
-  socket.on "chat", (data) ->
-    sockets.emit 'updatechat', socket.username, data
+  socket.on "chat", updateChat
 
   socket.on "adduser", (username) ->
     socket.username = username
@@ -70,6 +68,12 @@ sockets.on "connection", (socket) ->
     delete usernames[socket.username]
     sockets.emit 'updateusers', usernames
     socket.broadcast.emit 'updatechat', 'Playlist', socket.username + ' has disconnected'
+
+updateChat = (data) ->
+  sockets.emit 'updatechat', @username, data
+
+
+
 
 
 console.log "listening on port " + port
