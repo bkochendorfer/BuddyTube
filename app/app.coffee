@@ -24,19 +24,13 @@ sockets.on "connection", (socket) ->
 
   sockets.emit 'updateplaylist', playlist
 
-  socket.on "chat",     updateChat
-  socket.on "adduser",  addUser
-  socket.on "playlist", addSong
-  socket.on "enque",    enqueFirstSong
-  socket.on "sync",     syncPlayback
-
-  socket.on "mastersocketplayerdata", (id, time) ->
-    socket.broadcast.emit 'syncallusers', id, time
-
-  socket.on "disconnect", () ->
-    delete usernames[socket.username]
-    sockets.emit 'updateusers', usernames
-    socket.broadcast.emit 'updatechat', 'Playlist', socket.username + ' has disconnected'
+  socket.on "adduser",                addUser
+  socket.on "playlist",               addSong
+  socket.on "chat",                   updateChat
+  socket.on "disconnect",             disconnect
+  socket.on "enque",                  enqueFirstSong
+  socket.on "sync",                   syncPlayback
+  socket.on "mastersocketplayerdata", syncPlaybackForAllUsers
 
 updateChat = (data) ->
   sockets.emit 'updatechat', @username, data
@@ -57,6 +51,11 @@ addUser = (username) ->
   @broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
   sockets.emit 'updateusers', usernames
 
+disconnect = ->
+  delete usernames[@username]
+  sockets.emit 'updateusers', usernames
+  @broadcast.emit 'updatechat', 'Playlist', @username + ' has disconnected'
+
 addSong = (song) ->
   id = getYouTubeID(song)
   if (playlist[id] == undefined)
@@ -71,5 +70,8 @@ enqueFirstSong = ->
 syncPlayback = ->
   if @id != master
     sockets.socket(master).emit("getcurrentsongdata")
+
+syncPlaybackForAllUsers = (id, time) ->
+  @broadcast.emit 'syncallusers', id, time
 
 console.log "listening on port " + port
