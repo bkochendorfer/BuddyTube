@@ -7,6 +7,8 @@ app.set 'views', "#{ __dirname  }/views"
 app.set 'view engine', 'jade'
 app.engine 'jade', require('jade').__express
 
+{detect, isEmpty} = require 'underscore'
+
 app.get '/', (req, res) ->
   res.render 'chatroom'
 
@@ -14,11 +16,17 @@ app.use express.static("#{ __dirname }/public")
 
 usernames = {}
 playlist = {}
-master = ''
+connections = []
 
 io = require('socket.io').listen(app.listen(port))
 
-io.sockets.on 'connection', (socket) -> new ConnectionHandler(this, socket)
+io.sockets.on 'connection', (socket) ->
+  connection = new ConnectionHandler(this, socket)
+  connection.master = true if isEmpty(connections)
+  connections.push(connection)
+
+getMaster = ->
+  detect(connections, (connection) -> connection.isMaster())
 
 class ConnectionHandler
 
@@ -42,16 +50,15 @@ class ConnectionHandler
   emitToOthers: (args...) =>
     @socket.broadcast.emit(args...)
 
-  setMaster = (socket) =>
-    master = socket.id
-    socket.master = true
+  emitToMaster: (args...) =>
+    if master = getMaster()
+      master.socket.emit(args...)
 
-  isFirstUser = =>
-    Object.keys(usernames).length == 0
+  isMaster: =>
+    !!@master
 
   addUser: (username) =>
     @socket.username = username
-    setMaster(this) if isFirstUser()
     usernames[username] = username
 
     @emitToMyself 'updatechat', 'Playlist', 'you have connected'
@@ -79,8 +86,7 @@ class ConnectionHandler
     @emitToMyself 'enquefirstsong'
 
   syncPlayback: =>
-    if @socket.id != master
-      @sockets.socket(master).emit('getcurrentsongdata')
+    @emitToMaster 'getcurrentsongdata' unless @isMaster()
 
   syncPlaybackForAllUsers: (id, time) =>
     @emitToOthers 'syncallusers', id, time
