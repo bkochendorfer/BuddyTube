@@ -58,7 +58,8 @@ disconnect = ->
 
 addSong = (song) ->
   id = getYouTubeID(song)
-  if (playlist[id] == undefined)
+
+  if !playlist[id]?
     playlist[id] = id
     @emit 'updatechat', 'Playlist', "You added #{id} to the playlist"
     @broadcast.emit 'updatechat', 'Playlist', "#{@username} added #{id} to the playlist"
