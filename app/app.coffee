@@ -18,61 +18,72 @@ master = ''
 
 io = require('socket.io').listen(app.listen(port))
 
-sockets = io.sockets
+io.sockets.on 'connection', (socket) -> new ConnectionHandler(this, socket)
 
-sockets.on 'connection', (socket) ->
+class ConnectionHandler
 
-  sockets.emit 'updateplaylist', playlist
+  constructor: (@sockets, @socket) ->
+    @socket.on 'adduser',                @addUser
+    @socket.on 'playlist',               @addSong
+    @socket.on 'chat',                   @updateChat
+    @socket.on 'disconnect',             @disconnect
+    @socket.on 'enque',                  @enqueFirstSong
+    @socket.on 'sync',                   @syncPlayback
+    @socket.on 'mastersocketplayerdata', @syncPlaybackForAllUsers
 
-  socket.on 'adduser',                addUser
-  socket.on 'playlist',               addSong
-  socket.on 'chat',                   updateChat
-  socket.on 'disconnect',             disconnect
-  socket.on 'enque',                  enqueFirstSong
-  socket.on 'sync',                   syncPlayback
-  socket.on 'mastersocketplayerdata', syncPlaybackForAllUsers
+    @emitToAll 'updateplaylist', playlist
 
-updateChat = (data) ->
-  sockets.emit 'updatechat', @username, data
+  emitToAll: (args...) =>
+    @sockets.emit(args...)
 
-setMaster = (socket) ->
-  master = socket.id
-  socket.master = true
+  emitToMyself: (args...) =>
+    @socket.emit(args...)
 
-isFirstUser = ->
-  Object.keys(usernames).length == 0
+  emitToOthers: (args...) =>
+    @socket.broadcast.emit(args...)
 
-addUser = (username) ->
-  @username = username
-  setMaster(this) if isFirstUser()
-  usernames[username] = username
+  setMaster = (socket) =>
+    master = socket.id
+    socket.master = true
 
-  @emit 'updatechat', 'Playlist', 'you have connected'
-  @broadcast.emit 'updatechat', 'Playlist', "#{username} has connected"
-  sockets.emit 'updateusers', usernames
+  isFirstUser = =>
+    Object.keys(usernames).length == 0
 
-disconnect = ->
-  delete usernames[@username]
-  sockets.emit 'updateusers', usernames
-  @broadcast.emit 'updatechat', 'Playlist', "#{@username} has disconnected"
+  addUser: (username) =>
+    @socket.username = username
+    setMaster(this) if isFirstUser()
+    usernames[username] = username
 
-addSong = (song) ->
-  id = getYouTubeID(song)
+    @emitToMyself 'updatechat', 'Playlist', 'you have connected'
+    @emitToOthers 'updatechat', 'Playlist', "#{username} has connected"
+    @emitToAll 'updateusers', usernames
 
-  if !playlist[id]?
-    playlist[id] = id
-    @emit 'updatechat', 'Playlist', "You added #{id} to the playlist"
-    @broadcast.emit 'updatechat', 'Playlist', "#{@username} added #{id} to the playlist"
-    sockets.emit 'updateplaylist', playlist
+  addSong: (song) =>
+    id = getYouTubeID(song)
 
-enqueFirstSong = ->
-  @emit 'enquefirstsong'
+    if !playlist[id]?
+      playlist[id] = id
+      @emitToMyself 'updatechat', 'Playlist', "You added #{id} to the playlist"
+      @emitToOthers 'updatechat', 'Playlist', "#{@socket.username} added #{id} to the playlist"
+      @emitToAll 'updateplaylist', playlist
 
-syncPlayback = ->
-  if @id != master
-    sockets.socket(master).emit('getcurrentsongdata')
+  updateChat: (data) =>
+    @emitToAll 'updatechat', @socket.username, data
 
-syncPlaybackForAllUsers = (id, time) ->
-  @broadcast.emit 'syncallusers', id, time
+  disconnect: =>
+    delete usernames[@socket.username]
+    @emitToAll 'updateusers', usernames
+    @emitToOthers 'updatechat', 'Playlist', "#{@socket.username} has disconnected"
+
+  enqueFirstSong: =>
+    @emitToMyself 'enquefirstsong'
+
+  syncPlayback: =>
+    if @socket.id != master
+      @sockets.socket(master).emit('getcurrentsongdata')
+
+  syncPlaybackForAllUsers: (id, time) =>
+    @emitToOthers 'syncallusers', id, time
+
 
 console.log "listening on port #{port}"
