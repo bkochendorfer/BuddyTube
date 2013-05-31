@@ -7,14 +7,13 @@ app.set 'views', "#{ __dirname  }/views"
 app.set 'view engine', 'jade'
 app.engine 'jade', require('jade').__express
 
-{detect, isEmpty} = require 'underscore'
+{detect, isEmpty, without} = require 'underscore'
 
 app.get '/', (req, res) ->
   res.render 'chatroom'
 
 app.use express.static("#{ __dirname }/public")
 
-usernames = {}
 playlist = {}
 connections = []
 
@@ -23,10 +22,29 @@ io = require('socket.io').listen(app.listen(port))
 io.sockets.on 'connection', (socket) ->
   connection = new ConnectionHandler(this, socket)
   connection.master = true if isEmpty(connections)
+  addConnection(connection)
+
+
+addConnection = (connection) ->
   connections.push(connection)
 
-getMaster = ->
+removeConnection = (connection) ->
+  connections = without(connections, connection)
+
+getMasterConnection = ->
   detect(connections, (connection) -> connection.isMaster())
+
+getAllUsernames = ->
+  usernames = {}
+
+  for connection in connections
+    username = connection.username
+    usernames[username] = username
+
+  usernames
+
+getCurrentVideo = ->
+  "cTuxswB_Rew"
 
 class ConnectionHandler
 
@@ -51,19 +69,19 @@ class ConnectionHandler
     @socket.broadcast.emit(args...)
 
   emitToMaster: (args...) =>
-    if master = getMaster()
+    if master = getMasterConnection()
       master.socket.emit(args...)
 
   isMaster: =>
     !!@master
 
   addUser: (username) =>
-    @socket.username = username
-    usernames[username] = username
+    @username = username
 
     @emitToMyself 'updatechat', 'Playlist', 'you have connected'
     @emitToOthers 'updatechat', 'Playlist', "#{username} has connected"
-    @emitToAll 'updateusers', usernames
+    @emitToAll 'updateusers', getAllUsernames()
+    @emitToMyself 'playVideo', getCurrentVideo()
 
   addSong: (song) =>
     id = getYouTubeID(song)
@@ -71,16 +89,16 @@ class ConnectionHandler
     if !playlist[id]?
       playlist[id] = id
       @emitToMyself 'updatechat', 'Playlist', "You added #{id} to the playlist"
-      @emitToOthers 'updatechat', 'Playlist', "#{@socket.username} added #{id} to the playlist"
+      @emitToOthers 'updatechat', 'Playlist', "#{@username} added #{id} to the playlist"
       @emitToAll 'updateplaylist', playlist
 
   updateChat: (data) =>
-    @emitToAll 'updatechat', @socket.username, data
+    @emitToAll 'updatechat', @username, data
 
   disconnect: =>
-    delete usernames[@socket.username]
-    @emitToAll 'updateusers', usernames
-    @emitToOthers 'updatechat', 'Playlist', "#{@socket.username} has disconnected"
+    removeConnection(this)
+    @emitToAll 'updateusers', getAllUsernames()
+    @emitToOthers 'updatechat', 'Playlist', "#{@username} has disconnected"
 
   enqueFirstSong: =>
     @emitToMyself 'enquefirstsong'

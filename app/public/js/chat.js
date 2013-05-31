@@ -1,18 +1,23 @@
 window.onload = function() {
 
+  var wait = function(delay, cb) {
+    setTimeout(cb, delay);
+  };
+
   var socket = io.connect('/');
 
     socket.on('connect', function() {
-      socket.emit('adduser', prompt("Hi, who's there?"))
-      socket.emit('updateplaylist')
-      if (!$("#player").is(":visible")) {
-        socket.emit('enque')
-      }
-      socket.emit('sync')
+      console.log("[event] connect");
+      socket.emit('adduser', prompt("Hi, who's there?"));
+    });
+
+    socket.on('playVideo', function(videoId) {
+      console.log("[event] playVideo", videoId);
+      playVideo(videoId);
     });
 
     socket.on('updatechat', function (username, data) {
-      $('#convo').append('<b>'+username + ':</b> ' + data + '<br>');
+      $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
     });
 
     socket.on('updateusers', function(data) {
@@ -25,6 +30,8 @@ window.onload = function() {
     });
 
     socket.on('updateplaylist', function(data) {
+      console.log("[event] updateplaylist");
+
       $('#queue').empty();
       $.each(data, function(key, value) {
         $('#queue').append('<div>' + key + '</div>');
@@ -37,21 +44,21 @@ window.onload = function() {
       }
     });
 
-    socket.on('enquefirstsong', function(data) {
-      inQueue = $('#queue').children(":first").html()
-      setTimeout(function(){
-        jQuery("#player").tubeplayer("play", inQueue)
-      },1000);
-    });
+    // socket.on('enquefirstsong', function(data) {
+    //   inQueue = $('#queue').children(":first").html()
+    //   setTimeout(function(){
+    //     $("#player").tubeplayer("play", inQueue)
+    //   },1000);
+    // });
 
     socket.on('getcurrentsongdata', function(data){
-      id = jQuery("#player").tubeplayer('data').videoID
-      time = jQuery("#player").tubeplayer('data').currentTime
+      id = $("#player").tubeplayer('data').videoID
+      time = $("#player").tubeplayer('data').currentTime
       socket.emit('mastersocketplayerdata', id, time);
     });
 
     socket.on('syncallusers', function(id,time) {
-      jQuery("#player").tubeplayer("play", {id: id,time:time});
+      $("#player").tubeplayer("play", {id: id,time:time});
     });
 
     $('#send').click( function() {
@@ -73,18 +80,26 @@ window.onload = function() {
       }
     });
 
-    playNextSong = function() {
-      currentSong = jQuery("#player").tubeplayer('data').videoID;
+    var playNextSong = function() {
+      currentSong = $("#player").tubeplayer('data').videoID;
       nextSong = $("#queue div:contains('" + currentSong+ "')").next().html()
       if(nextSong == null){
-        jQuery("#player").tubeplayer('stop');
+        $("#player").tubeplayer('stop');
       }
       else {
-        jQuery("#player").tubeplayer("play", nextSong);
+        $("#player").tubeplayer("play", nextSong);
       }
     };
 
-    jQuery("#player").tubeplayer({
+    var playVideo = function(videoId) {
+      console.log("#playVideo", videoId);
+
+      wait(1000, function() {
+        $("#player").tubeplayer("play", { id: videoId });
+      });
+    };
+
+    $("#player").tubeplayer({
       allowFullScreen: "false",
       initialVideo: "",
       showControls: false,
