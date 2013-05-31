@@ -1,84 +1,85 @@
 window.onload = function() {
 
+  var socket = io.connect('/');
+
+  // Perform `cb` after `delay` ms.
   var wait = function(delay, cb) {
     setTimeout(cb, delay);
   };
 
-  var socket = io.connect('/');
+  // Perform `cb` every `interval` ms.
+  var every = function(interval, cb) {
+    setInterval(cb, interval);
+  };
 
-    socket.on('connect', function() {
-      console.log("[event] connect");
-      socket.emit('adduser', prompt("Hi, who's there?"));
-    });
+  // Add user when a new one connects.
+  socket.on('connect', function() {
+    console.log("[event] connect");
+    socket.emit('adduser', prompt("Hi, who's there?"));
+  });
 
-    socket.on('playVideo', function(videoId) {
-      console.log("[event] playVideo", videoId);
-      playVideo(videoId);
-    });
+  // Every 2 seconds, publish current video status.
+  every(2000, function() {
+    socket.emit('playerData', $("#player").tubeplayer('data'));
+  });
 
-    socket.on('updatechat', function (username, data) {
-      $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
-    });
+  // Play the specified video.
+  socket.on('playVideo', function(videoData) {
+    console.log("[event] playVideo", videoData);
+    playVideo(videoData);
+  });
 
-    socket.on('updateusers', function(data) {
-      $('#users').empty();
-      $.each(data, function(key, value) {
-        if (key){
-          $('#users').append('<div>' + key + '</div>');
-        }
-      });
-    });
+  // Add chat to the list.
+  socket.on('updatechat', function (username, data) {
+    $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
+  });
 
-    socket.on('updateplaylist', function(data) {
-      console.log("[event] updateplaylist");
+  // Update the list of currently connected users.
+  socket.on('updateusers', function(data) {
+    console.log("[event] updateusers");
 
-      $('#queue').empty();
-      $.each(data, function(key, value) {
-        $('#queue').append('<div>' + key + '</div>');
-      });
-      if(! $('#queue').is(':empty')) {
-        $('#player').show();
-        if($('#queue').children().size() == 1){
-          socket.emit('enque');
-        }
-      }
-    });
+    var userListMarkup = $.map(data, function(key, value) {
+      return '<div>' + key + '</div>';
+    }).join();
 
-    // socket.on('enquefirstsong', function(data) {
-    //   inQueue = $('#queue').children(":first").html()
-    //   setTimeout(function(){
-    //     $("#player").tubeplayer("play", inQueue)
-    //   },1000);
+    console.log(userListMarkup);
+
+    $('#users').html(userListMarkup);
+  });
+
+  // Update the list of queued videos.
+  socket.on('updateplaylist', function(data) {
+    console.log("[event] updateplaylist");
+
+    var playListMarkup = $.map(data, function(key, value) {
+      return '<div>' + key + '</div>';
+    }).join();
+
+    $("#queue").html(playListMarkup);
+  });
+
+    // socket.on('syncallusers', function(id,time) {
+    //   $("#player").tubeplayer("play", {id: id,time:time});
     // });
 
-    socket.on('getcurrentsongdata', function(data){
-      id = $("#player").tubeplayer('data').videoID
-      time = $("#player").tubeplayer('data').currentTime
-      socket.emit('mastersocketplayerdata', id, time);
-    });
+    // $('#send').click( function() {
+    //   var message = $('#data').val();
+    //   $('#data').val('');
+    //   if(message.indexOf('youtube') != -1){
+    //     socket.emit('playlist', message);
+    //   }
+    //   else {
+    //     socket.emit('chat', message);
+    //   }
+    // });
 
-    socket.on('syncallusers', function(id,time) {
-      $("#player").tubeplayer("play", {id: id,time:time});
-    });
-
-    $('#send').click( function() {
-      var message = $('#data').val();
-      $('#data').val('');
-      if(message.indexOf('youtube') != -1){
-        socket.emit('playlist', message);
-      }
-      else {
-        socket.emit('chat', message);
-      }
-    });
-
-    $('#data').keypress(function(e) {
-      if(e.which == 13) {
-        $(this).blur();
-        $('#send').focus().click();
-        $('#data').focus();
-      }
-    });
+    // $('#data').keypress(function(e) {
+    //   if(e.which == 13) {
+    //     $(this).blur();
+    //     $('#send').focus().click();
+    //     $('#data').focus();
+    //   }
+    // });
 
     var playNextSong = function() {
       currentSong = $("#player").tubeplayer('data').videoID;
@@ -91,11 +92,11 @@ window.onload = function() {
       }
     };
 
-    var playVideo = function(videoId) {
-      console.log("#playVideo", videoId);
+    var playVideo = function(videoData) {
+      console.log("#playVideo", videoData);
 
       wait(1000, function() {
-        $("#player").tubeplayer("play", { id: videoId });
+        $("#player").tubeplayer("play", videoData);
       });
     };
 

@@ -44,12 +44,23 @@ getAllUsernames = ->
   usernames
 
 getCurrentVideo = ->
-  "cTuxswB_Rew"
+  getMasterVideo() || getDefaultVideo()
+
+getMasterVideo = ->
+  return unless master = getMasterConnection()
+  return unless master.currentVideoId?
+
+  id: master.currentVideoId
+  time: master.currentVideoTime
+
+getDefaultVideo = ->
+  id: "cTuxswB_Rew"
 
 class ConnectionHandler
 
   constructor: (@sockets, @socket) ->
     @socket.on 'adduser',                @addUser
+    @socket.on 'playerData',             @savePlayerData
     @socket.on 'playlist',               @addSong
     @socket.on 'chat',                   @updateChat
     @socket.on 'disconnect',             @disconnect
@@ -82,6 +93,11 @@ class ConnectionHandler
     @emitToOthers 'updatechat', 'Playlist', "#{username} has connected"
     @emitToAll 'updateusers', getAllUsernames()
     @emitToMyself 'playVideo', getCurrentVideo()
+
+  savePlayerData: (data) =>
+    console.log "#savePlayerData"
+    @currentVideoId = data.videoID
+    @currentVideoTime = data.currentTime
 
   addSong: (song) =>
     id = getYouTubeID(song)
