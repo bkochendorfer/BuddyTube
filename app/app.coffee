@@ -56,6 +56,7 @@ getMasterVideo = ->
   id: master.currentVideoId
   time: master.currentVideoTime
 
+# Bwaaamp bwamp bwamp bwamp bwamp bwwaaaaamp.
 getDefaultVideo = ->
   id: "ah4VQXe8YqU"
 
