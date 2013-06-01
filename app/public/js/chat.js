@@ -79,7 +79,7 @@ window.onload = function() {
 
   // Determine whether a string is a YouTube url.
   var isYouTubeUrl = function(str) {
-    str.indexOf('youtube') > -1
+    return str.indexOf('youtube') > -1;
   };
 
   socket.on('connect', addUser);
