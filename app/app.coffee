@@ -81,7 +81,7 @@ class ConnectionHandler
     @socket.on 'mastersocketplayerdata', @syncPlaybackForAllUsers
     @socket.on 'videoFinished',          @playNextVideo
 
-    @emitToAll 'updateplaylist', playlist
+    @emitToAll 'updatePlaylist', playlist
 
   emitToAll: (args...) =>
     @sockets.emit(args...)
@@ -104,7 +104,7 @@ class ConnectionHandler
 
     @emitToMyself 'updateChat', 'Playlist', 'you have connected'
     @emitToOthers 'updateChat', 'Playlist', "#{username} has connected"
-    @emitToAll 'updateusers', getAllUsernames()
+    @emitToAll 'updateUsers', getAllUsernames()
     @emitToMyself 'playVideo', getCurrentVideo()
 
   savePlayerData: (data) =>
@@ -126,7 +126,7 @@ class ConnectionHandler
 
   disconnect: =>
     removeConnection(this)
-    @emitToAll 'updateusers', getAllUsernames()
+    @emitToAll 'updateUsers', getAllUsernames()
     @emitToOthers 'updateChat', 'Playlist', "#{@username} has disconnected"
 
   enqueFirstSong: =>

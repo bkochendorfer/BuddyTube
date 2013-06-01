@@ -85,8 +85,8 @@ window.onload = function() {
   socket.on('connect', addUser);
   socket.on('playVideo', playVideo);
   socket.on('updateChat', updateChat);
-  socket.on('updateusers', updateUsers);
-  socket.on('updateplaylist', updatePlaylist);
+  socket.on('updateUsers', updateUsers);
+  socket.on('updatePlaylist', updatePlaylist);
 
   every(2000, publishCurrentVideoStatus);
 
