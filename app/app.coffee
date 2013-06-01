@@ -7,7 +7,7 @@ app.set 'views', "#{ __dirname  }/views"
 app.set 'view engine', 'jade'
 app.engine 'jade', require('jade').__express
 
-{detect, isEmpty, without} = require 'underscore'
+{detect, map, isEmpty, without} = require 'underscore'
 
 app.get '/', (req, res) ->
   res.render 'chatroom'
@@ -35,7 +35,7 @@ getMasterConnection = ->
   detect(connections, (connection) -> connection.isMaster())
 
 getAllUsernames = ->
-  connection.username for connection in connections
+  map(connections, (connection) -> connection.username)
 
 getCurrentVideo = ->
   getMasterVideo() || getDefaultVideo()
