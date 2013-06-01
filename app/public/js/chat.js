@@ -14,7 +14,7 @@ window.onload = function() {
 
   // Add a user.
   var addUser = function() {
-    socket.emit('adduser', prompt("Hi, who's there?"));
+    socket.emit('addUser', prompt("Hi, who's there?"));
   };
 
   // Play a video given the specificed data.
