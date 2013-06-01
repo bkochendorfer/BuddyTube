@@ -7,7 +7,7 @@ app.set 'views', "#{ __dirname  }/views"
 app.set 'view engine', 'jade'
 app.engine 'jade', require('jade').__express
 
-{detect, isEmpty, without} = require 'underscore'
+{detect, isEmpty, without, keys, shuffle, first} = require 'underscore'
 
 app.get '/', (req, res) ->
   res.render 'chatroom'
@@ -50,7 +50,13 @@ getNextVideo = ->
   if isEmpty(playlist)
     getDefaultVideo()
   else
-    id: "EWztMpyk8hQ"
+    popVideoOffQueue(playlist)
+
+popVideoOffQueue = (playlist) ->
+  videoIds = keys(playlist)
+  videoId = first(shuffle(videoIds))
+
+  id: videoId
 
 getMasterVideo = ->
   return unless master = getMasterConnection()
