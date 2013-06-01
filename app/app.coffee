@@ -7,7 +7,7 @@ app.set 'views', "#{ __dirname  }/views"
 app.set 'view engine', 'jade'
 app.engine 'jade', require('jade').__express
 
-{detect, isEmpty, without, keys, shuffle, first} = require 'underscore'
+{detect, isEmpty, without} = require 'underscore'
 
 app.get '/', (req, res) ->
   res.render 'chatroom'
