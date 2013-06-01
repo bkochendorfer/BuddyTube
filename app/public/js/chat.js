@@ -104,7 +104,11 @@ window.onload = function() {
     var message = $messageInput.val();
     clearInput($messageInput);
 
-    isYouTubeUrl(message) ? publishNewVideo(message) : publishNewMessage(message);
+    if (isYouTubeUrl(message)) {
+      publishNewVideo(message);
+    } else {
+      publishNewMessage(message);
+    }
   });
 
 
@@ -129,4 +133,4 @@ window.onload = function() {
 
   // Event publications.
   every(2000, publishCurrentVideoStatus);
-}
+};
