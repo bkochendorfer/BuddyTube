@@ -89,10 +89,6 @@ class ConnectionHandler
   emitToOthers: (args...) =>
     @socket.broadcast.emit(args...)
 
-  emitToMaster: (args...) =>
-    if master = getMasterConnection()
-      master.socket.emit(args...)
-
   isMaster: =>
     !!@master
 
