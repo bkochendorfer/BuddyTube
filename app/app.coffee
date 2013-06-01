@@ -46,6 +46,12 @@ getAllUsernames = ->
 getCurrentVideo = ->
   getMasterVideo() || getDefaultVideo()
 
+getNextVideo = ->
+  if isEmpty(playlist)
+    getDefaultVideo()
+  else
+    id: "EWztMpyk8hQ"
+
 getMasterVideo = ->
   return unless master = getMasterConnection()
   return unless master.currentVideoId?
@@ -54,7 +60,7 @@ getMasterVideo = ->
   time: master.currentVideoTime
 
 getDefaultVideo = ->
-  id: "cTuxswB_Rew"
+  id: "ah4VQXe8YqU"
 
 class ConnectionHandler
 
@@ -67,6 +73,7 @@ class ConnectionHandler
     @socket.on 'enque',                  @enqueFirstSong
     @socket.on 'sync',                   @syncPlayback
     @socket.on 'mastersocketplayerdata', @syncPlaybackForAllUsers
+    @socket.on 'videoFinished',          @playNextVideo
 
     @emitToAll 'updateplaylist', playlist
 
@@ -89,8 +96,8 @@ class ConnectionHandler
   addUser: (username) =>
     @username = username
 
-    @emitToMyself 'updatechat', 'Playlist', 'you have connected'
-    @emitToOthers 'updatechat', 'Playlist', "#{username} has connected"
+    @emitToMyself 'updateChat', 'Playlist', 'you have connected'
+    @emitToOthers 'updateChat', 'Playlist', "#{username} has connected"
     @emitToAll 'updateusers', getAllUsernames()
     @emitToMyself 'playVideo', getCurrentVideo()
 
@@ -104,17 +111,17 @@ class ConnectionHandler
 
     if !playlist[id]?
       playlist[id] = id
-      @emitToMyself 'updatechat', 'Playlist', "You added #{id} to the playlist"
-      @emitToOthers 'updatechat', 'Playlist', "#{@username} added #{id} to the playlist"
+      @emitToMyself 'updateChat', 'Playlist', "You added #{id} to the playlist"
+      @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{id} to the playlist"
       @emitToAll 'updateplaylist', playlist
 
   updateChat: (data) =>
-    @emitToAll 'updatechat', @username, data
+    @emitToAll 'updateChat', @username, data
 
   disconnect: =>
     removeConnection(this)
     @emitToAll 'updateusers', getAllUsernames()
-    @emitToOthers 'updatechat', 'Playlist', "#{@username} has disconnected"
+    @emitToOthers 'updateChat', 'Playlist', "#{@username} has disconnected"
 
   enqueFirstSong: =>
     @emitToMyself 'enquefirstsong'
@@ -124,6 +131,9 @@ class ConnectionHandler
 
   syncPlaybackForAllUsers: (id, time) =>
     @emitToOthers 'syncallusers', id, time
+
+  playNextVideo: =>
+    @emitToAll 'playVideo', getNextVideo() if @isMaster()
 
 
 console.log "listening on port #{port}"

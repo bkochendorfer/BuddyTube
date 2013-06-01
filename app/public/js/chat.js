@@ -12,110 +12,101 @@ window.onload = function() {
     setInterval(cb, interval);
   };
 
-  // Add user when a new one connects.
-  socket.on('connect', function() {
-    console.log("[event] connect");
+  // Add a user.
+  var addUser = function() {
     socket.emit('adduser', prompt("Hi, who's there?"));
-  });
+  };
 
-  // Every 2 seconds, publish current video status.
-  every(2000, function() {
-    socket.emit('playerData', $("#player").tubeplayer('data'));
-  });
-
-  // Play the specified video.
-  socket.on('playVideo', function(videoData) {
-    console.log("[event] playVideo", videoData);
-    playVideo(videoData);
-  });
+  // Play a video given the specificed data.
+  //
+  // videoData
+  //    - id: The YouTube video id.
+  //    - time: The timestamp at which to start the video.
+  //
+  var playVideo = function(videoData) {
+    wait(1000, function() {
+      $("#player").tubeplayer("play", videoData);
+    });
+  };
 
   // Add chat to the list.
-  socket.on('updatechat', function (username, data) {
+  var updateChat = function (username, data) {
     $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
-  });
+  };
 
   // Update the list of currently connected users.
-  socket.on('updateusers', function(data) {
-    console.log("[event] updateusers");
-
+  var updateUsers = function(data) {
     var userListMarkup = $.map(data, function(key, value) {
       return '<div>' + key + '</div>';
     }).join();
 
-    console.log(userListMarkup);
-
     $('#users').html(userListMarkup);
-  });
+  };
 
   // Update the list of queued videos.
-  socket.on('updateplaylist', function(data) {
-    console.log("[event] updateplaylist");
-
+  var updatePlaylist = function(data) {
     var playListMarkup = $.map(data, function(key, value) {
       return '<div>' + key + '</div>';
     }).join();
 
     $("#queue").html(playListMarkup);
+  };
+
+  // Publish current video status.
+  var publishCurrentVideoStatus = function() {
+    socket.emit('playerData', $("#player").tubeplayer('data'));
+  };
+
+  // Publish a new chat message.
+  var publishNewMessage = function(message) {
+    socket.emit('chat', message);
+  };
+
+  // Publish a new video addition.
+  var publishNewVideo = function(video) {
+    socket.emit('playlist', video);
+  };
+
+  // Publish an event when video is finished.
+  var publishVideoFinished = function() {
+    socket.emit('videoFinished');
+  };
+
+  // Clear an input.
+  var clearInput = function($input) {
+    $input.val('');
+  };
+
+  // Determine whether a string is a YouTube url.
+  var isYouTubeUrl = function(str) {
+    str.indexOf('youtube') > -1
+  };
+
+  socket.on('connect', addUser);
+  socket.on('playVideo', playVideo);
+  socket.on('updateChat', updateChat);
+  socket.on('updateusers', updateUsers);
+  socket.on('updateplaylist', updatePlaylist);
+
+  every(2000, publishCurrentVideoStatus);
+
+  // When form is submitted, add the video to the playlist.
+  $('.content-form').submit(function(e) {
+    e.preventDefault();
+
+    var $messageInput = $('#data', this);
+    var message = $messageInput.val();
+    clearInput($messageInput);
+
+    isYouTubeUrl(message) ? publishNewVideo(message) : publishNewMessage(message);
   });
 
-    // socket.on('syncallusers', function(id,time) {
-    //   $("#player").tubeplayer("play", {id: id,time:time});
-    // });
-
-    // $('#send').click( function() {
-    //   var message = $('#data').val();
-    //   $('#data').val('');
-    //   if(message.indexOf('youtube') != -1){
-    //     socket.emit('playlist', message);
-    //   }
-    //   else {
-    //     socket.emit('chat', message);
-    //   }
-    // });
-
-    // $('#data').keypress(function(e) {
-    //   if(e.which == 13) {
-    //     $(this).blur();
-    //     $('#send').focus().click();
-    //     $('#data').focus();
-    //   }
-    // });
-
-    var playNextSong = function() {
-      currentSong = $("#player").tubeplayer('data').videoID;
-      nextSong = $("#queue div:contains('" + currentSong+ "')").next().html()
-      if(nextSong == null){
-        $("#player").tubeplayer('stop');
-      }
-      else {
-        $("#player").tubeplayer("play", nextSong);
-      }
-    };
-
-    var playVideo = function(videoData) {
-      console.log("#playVideo", videoData);
-
-      wait(1000, function() {
-        $("#player").tubeplayer("play", videoData);
-      });
-    };
-
-    $("#player").tubeplayer({
-      allowFullScreen: "false",
-      initialVideo: "",
-      showControls: false,
-      autoPlay: false,
-      autoHide: true,
-      preferredQuality: "default",
-      onPlay: function(id){},
-      onPause: function(){},
-      onStop: function(){},
-      onSeek: function(time){},
-      onMute: function(){},
-      onUnMute: function(){},
-      onPlayerEnded: function(){
-        playNextSong();
-      }
-    });
+  $("#player").tubeplayer({
+    onPlayerEnded: publishVideoFinished,
+    allowFullScreen: "false",
+    showControls: false,
+    autoPlay: false,
+    autoHide: true
+  });
 
 }
