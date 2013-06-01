@@ -71,12 +71,12 @@ getDefaultVideo = ->
 class ConnectionHandler
 
   constructor: (@sockets, @socket) ->
-    @socket.on 'addUser',                @addUser
-    @socket.on 'playerData',             @savePlayerData
-    @socket.on 'playlist',               @addSong
-    @socket.on 'chat',                   @updateChat
-    @socket.on 'disconnect',             @disconnect
-    @socket.on 'videoFinished',          @playNextVideo
+    @socket.on 'addUser',       @addUser
+    @socket.on 'playerData',    @savePlayerData
+    @socket.on 'playlist',      @addSong
+    @socket.on 'chat',          @updateChat
+    @socket.on 'disconnect',    @disconnect
+    @socket.on 'videoFinished', @playNextVideo
 
     @emitToAll 'updatePlaylist', playlist
 
