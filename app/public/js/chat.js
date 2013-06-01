@@ -64,7 +64,7 @@ window.onload = function() {
 
   // Publish a new video addition.
   var publishNewVideo = function(video) {
-    socket.emit('playlist', video);
+    socket.emit('videoAdded', video);
   };
 
   // Publish an event when video is finished.

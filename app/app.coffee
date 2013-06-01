@@ -73,9 +73,9 @@ class ConnectionHandler
   constructor: (@sockets, @socket) ->
     @socket.on 'addUser',       @addUser
     @socket.on 'playerData',    @savePlayerData
-    @socket.on 'playlist',      @addSong
     @socket.on 'chat',          @updateChat
     @socket.on 'disconnect',    @disconnect
+    @socket.on 'videoAdded',    @addVideo
     @socket.on 'videoFinished', @playNextVideo
 
     @emitToAll 'updatePlaylist', playlist
@@ -109,8 +109,8 @@ class ConnectionHandler
     @currentVideoId = data.videoID
     @currentVideoTime = data.currentTime
 
-  addSong: (song) =>
-    id = getYouTubeID(song)
+  addVideo: (video) =>
+    id = getYouTubeID(video)
 
     if !playlist[id]?
       playlist[id] = id
