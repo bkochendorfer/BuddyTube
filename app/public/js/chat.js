@@ -47,7 +47,7 @@ window.onload = function() {
   var updatePlaylist = function(data) {
     var playListMarkup = $.map(data, function(key, value) {
       return '<div>' + key + '</div>';
-    }).join();
+    }).join('');
 
     $("#queue").html(playListMarkup);
   };

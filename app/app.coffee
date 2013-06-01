@@ -106,7 +106,7 @@ class ConnectionHandler
       playlist[id] = id
       @emitToMyself 'updateChat', 'Playlist', "You added #{id} to the playlist"
       @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{id} to the playlist"
-      @emitToAll 'updateplaylist', playlist
+      @emitToAll 'updatePlaylist', playlist
 
   updateChat: (data) =>
     @emitToAll 'updateChat', @username, data
