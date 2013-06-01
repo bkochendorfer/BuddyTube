@@ -104,6 +104,7 @@ window.onload = function() {
   $("#player").tubeplayer({
     onPlayerEnded: publishVideoFinished,
     allowFullScreen: "false",
+    initialVideo: "ah4VQXe8YqU",
     showControls: false,
     autoPlay: false,
     autoHide: true
