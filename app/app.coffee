@@ -14,7 +14,7 @@ app.get '/', (req, res) ->
 
 app.use express.static("#{ __dirname }/public")
 
-playlist = {}
+playlist = []
 connections = []
 
 io = require('socket.io').listen(app.listen(port))
@@ -46,11 +46,8 @@ getNextVideo = ->
   else
     popVideoOffQueue(playlist)
 
-popVideoOffQueue = (playlist) ->
-  videoIds = keys(playlist)
-  videoId = first(shuffle(videoIds))
-
-  id: videoId
+popVideoOffQueue = (videos) ->
+  id: playlist.shift()
 
 getMasterVideo = ->
   return unless master = getMasterConnection()
@@ -89,24 +86,23 @@ class ConnectionHandler
   addUser: (username) =>
     @username = username
 
-    @emitToMyself 'updateChat', 'Playlist', 'you have connected'
-    @emitToOthers 'updateChat', 'Playlist', "#{username} has connected"
     @emitToAll 'updateUsers', getAllUsernames()
+    @emitToOthers 'updateChat', 'Playlist', "#{username} has connected"
+    @emitToMyself 'updateChat', 'Playlist', 'you have connected'
     @emitToMyself 'playVideo', getCurrentVideo()
 
   savePlayerData: (data) =>
-    console.log "#savePlayerData"
     @currentVideoId = data.videoID
     @currentVideoTime = data.currentTime
 
   addVideo: (video) =>
     id = getYouTubeID(video)
 
-    if !playlist[id]?
-      playlist[id] = id
-      @emitToMyself 'updateChat', 'Playlist', "You added #{id} to the playlist"
-      @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{id} to the playlist"
-      @emitToAll 'updatePlaylist', playlist
+    playlist.push(id)
+
+    @emitToAll 'updatePlaylist', playlist
+    @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{id} to the playlist"
+    @emitToMyself 'updateChat', 'Playlist', "You added #{id} to the playlist"
 
   updateChat: (data) =>
     @emitToAll 'updateChat', @username, data
@@ -117,7 +113,9 @@ class ConnectionHandler
     @emitToOthers 'updateChat', 'Playlist', "#{@username} has disconnected"
 
   playNextVideo: =>
-    @emitToAll 'playVideo', getNextVideo() if @isMaster()
+    if @isMaster()
+      @emitToAll 'playVideo', getNextVideo()
+      @emitToAll 'updatePlaylist', playlist
 
 
 console.log "listening on port #{port}"

@@ -35,8 +35,8 @@ window.onload = function() {
   };
 
   // Update the list of currently connected users.
-  var updateUsers = function(data) {
-    var userListMarkup = $.map(data, function(username) {
+  var updateUsers = function(usernames) {
+    var userListMarkup = $.map(usernames, function(username) {
       return '<div>' + username + '</div>';
     }).join('');
 
@@ -44,9 +44,9 @@ window.onload = function() {
   };
 
   // Update the list of queued videos.
-  var updatePlaylist = function(data) {
-    var playListMarkup = $.map(data, function(key, value) {
-      return '<div>' + key + '</div>';
+  var updatePlaylist = function(videoIds) {
+    var playListMarkup = $.map(videoIds, function(videoId) {
+      return '<div>' + videoId + '</div>';
     }).join('');
 
     $("#queue").html(playListMarkup);
