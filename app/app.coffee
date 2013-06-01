@@ -76,7 +76,6 @@ class ConnectionHandler
     @socket.on 'playlist',               @addSong
     @socket.on 'chat',                   @updateChat
     @socket.on 'disconnect',             @disconnect
-    @socket.on 'enque',                  @enqueFirstSong
     @socket.on 'sync',                   @syncPlayback
     @socket.on 'mastersocketplayerdata', @syncPlaybackForAllUsers
     @socket.on 'videoFinished',          @playNextVideo
@@ -128,9 +127,6 @@ class ConnectionHandler
     removeConnection(this)
     @emitToAll 'updateUsers', getAllUsernames()
     @emitToOthers 'updateChat', 'Playlist', "#{@username} has disconnected"
-
-  enqueFirstSong: =>
-    @emitToMyself 'enquefirstsong'
 
   syncPlayback: =>
     @emitToMaster 'getcurrentsongdata' unless @isMaster()
