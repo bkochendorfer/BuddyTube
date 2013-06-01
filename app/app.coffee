@@ -1,6 +1,5 @@
 express = require 'express'
 getYouTubeID = require 'get-youtube-id'
-youtube = require 'youtube-feeds'
 {detect, map, isEmpty, without} = require 'underscore'
 
 
