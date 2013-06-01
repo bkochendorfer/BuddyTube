@@ -35,13 +35,7 @@ getMasterConnection = ->
   detect(connections, (connection) -> connection.isMaster())
 
 getAllUsernames = ->
-  usernames = {}
-
-  for connection in connections
-    username = connection.username
-    usernames[username] = username
-
-  usernames
+  connection.username for connection in connections
 
 getCurrentVideo = ->
   getMasterVideo() || getDefaultVideo()

@@ -36,9 +36,9 @@ window.onload = function() {
 
   // Update the list of currently connected users.
   var updateUsers = function(data) {
-    var userListMarkup = $.map(data, function(key, value) {
-      return '<div>' + key + '</div>';
-    }).join();
+    var userListMarkup = $.map(data, function(username) {
+      return '<div>' + username + '</div>';
+    }).join('');
 
     $('#users').html(userListMarkup);
   };
