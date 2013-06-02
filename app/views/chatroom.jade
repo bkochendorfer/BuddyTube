@@ -18,7 +18,9 @@ html
       #queue
 
     #convo(style='width: 500px; height 300px; margin: 0 0 20px  0; border: solid 1px #999; overflow-y: scroll;')
-    .controls
-      input.data#data(style='width:350px;')
-      input.send#send(type='button', value='send')
-    #player(style='display:none;')
+
+    form.content-form
+      .controls
+        input.data#data(style='width:350px;')
+        input.send#send(type='submit', value='send')
+    #player
