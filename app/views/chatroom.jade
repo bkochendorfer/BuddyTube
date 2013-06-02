@@ -5,20 +5,26 @@ html
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(href='/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/bootstrap-responsive.min.css', rel='stylesheet')
+    link(href='/css/chat.css', rel='stylesheet')
     title = "Playlist"
     script(src='/socket.io/socket.io.js')
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js")
     script(src='/js/jQuery.tubeplayer.min.js')
     script(src='/js/chat.js')
   body
-    #userlist(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;') Users:
-      #users
-
-    #playlist(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;') Play list:
-      #queue
-
-    #convo(style='width: 500px; height 300px; margin: 0 0 20px  0; border: solid 1px #999; overflow-y: scroll;')
-    .controls
-      input.data#data(style='width:350px;')
-      input.send#send(type='button', value='send')
-    #player(style='display:none;')
+    .container-fluid
+      .row-flud
+        .span1
+          h5#userlist Users:
+          #users
+        .span2
+          h5#playlist Play list:
+          #queue
+        .span4
+          #convowrap
+            #convo
+          .controls
+            input.data#data(type='text')
+            input.send.btn.btn-small.btn-primary#send(type='button', value='send')
+        .span5
+          #player(style='display:none;')
