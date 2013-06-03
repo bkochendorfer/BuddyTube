@@ -12,19 +12,40 @@ html
     script(src='/js/jQuery.tubeplayer.min.js')
     script(src='/js/chat.js')
   body
-    .container-fluid
-      .row-flud
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          .nav-collapse.collapse
+            a.brand BuddyTube
+
+    .container-fluid#main
+
+      .row-fluid
+        .span12
+
+      .row-fluid
+        .span12
+
+      .row-fluid
+        .span12
+
+      .row-fluid
         .span1
           h5#userlist Users:
           #users
+
         .span2
           h5#playlist Play list:
           #queue
+
         .span4
-          #convowrap
+          #convowrap.bs-docs-example
             #convo
-          .controls
-            input.data#data(type='text')
-            input.send.btn.btn-small.btn-primary#send(type='submit', value='send')
+
+          form.content-form
+            .controls
+              input.data#data
+              input.send.btn.btn-info#send(type='submit', value='send')
+
         .span5
-          #player(style='display:none;')
+          #player

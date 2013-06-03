@@ -8,9 +8,17 @@
 	width: 420px;
 	height: 315px;
 	overflow: hidden;
+	margin-right: 50px;
 }
 
 #send {
-	margin-bottom: 10px;
 	margin-left: 10px;
+}
+
+body {
+	background-color:  whitesmoke;
+}
+
+#main {
+	background-color: white;
 }
