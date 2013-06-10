@@ -1,5 +1,7 @@
-express = require 'express'
-getYouTubeID = require 'get-youtube-id'
+express       = require 'express'
+getYouTubeID  = require 'get-youtube-id'
+youtubeData   = require 'youtube-feeds'
+
 {detect, map, isEmpty, without} = require 'underscore'
 
 
@@ -26,7 +28,6 @@ io.sockets.on 'connection', (socket) ->
   connection = new ConnectionHandler(this, socket)
   connection.master = true if isEmpty(connections)
   addConnection(connection)
-
 
 # Cache of Youtube video ids in the queue.
 playlist = []
@@ -71,8 +72,7 @@ getNextVideo = ->
 
 # Remove the next video from the cached list.
 popVideoOffQueue = (videos) ->
-  id: playlist.shift()
-
+  id: (videos.shift()['id'])
 
 # Get the video that is currently being played on the `master` connection.
 getMasterVideo = ->
@@ -145,13 +145,14 @@ class ConnectionHandler
 
   # A new video has been added to ol' BuddyChoob.
   addVideo: (video) =>
-    id = getYouTubeID(video)
+    videoId = getYouTubeID(video)
 
-    playlist.push(id)
-
-    @emitToAll 'updatePlaylist', playlist
-    @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{id} to the playlist"
-    @emitToMyself 'updateChat', 'Playlist', "You added #{id} to the playlist"
+    # Get song title and other data from the Choob.
+    youtubeData.video videoId, (err, songData) =>
+      playlist.push({id : videoId, title: songData.title})
+      @emitToAll 'updatePlaylist', playlist
+      @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{songData.title} to the playlist"
+      @emitToMyself 'updateChat', 'Playlist', "You added #{songData.title} to the playlist"
 
 
   # A new chat has been posted in the ol' BuddyChoob.
