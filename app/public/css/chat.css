@@ -1,0 +1,24 @@
+#convo {
+	width: 435px;
+	height: 330px;
+	overflow: scroll;
+}
+
+#convowrap {
+	width: 420px;
+	height: 315px;
+	overflow: hidden;
+	margin-right: 50px;
+}
+
+#send {
+	margin-left: 10px;
+}
+
+body {
+	background-color:  whitesmoke;
+}
+
+#main {
+	background-color: white;
+}

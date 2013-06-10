@@ -12,7 +12,8 @@
     "underscore.string": "~2.3.0",
     "connect-assets": "~2.3.3",
     "socket.io": "*",
-    "get-youtube-id": "*"
+    "get-youtube-id": "*",
+    "youtube-feeds": "*"
   },
   "repository": "",
   "author": "",
