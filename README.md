@@ -13,3 +13,8 @@
 
 
 Collaborative youtube chatroom with syncing capabilities across clients.
+
+### Get started
+
+`make setup server` and browse to localhost:3000/
+
