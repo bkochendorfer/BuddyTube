@@ -5,22 +5,47 @@ html
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(href='/css/bootstrap.min.css', rel='stylesheet')
     link(href='/css/bootstrap-responsive.min.css', rel='stylesheet')
+    link(href='/css/chat.css', rel='stylesheet')
     title = "Playlist"
     script(src='/socket.io/socket.io.js')
     script(src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js")
     script(src='/js/jQuery.tubeplayer.min.js')
     script(src='/js/chat.js')
   body
-    #userlist(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;') Users:
-      #users
+    .navbar.navbar-inverse.navbar-fixed-top
+      .navbar-inner
+        .container-fluid
+          .nav-collapse.collapse
+            a.brand BuddyTube
 
-    #playlist(style='float:left;width:100px;border-right:1px solid black;height:300px;padding:10px;overflow:scroll-y;') Play list:
-      #queue
+    .container-fluid#main
 
-    #convo(style='width: 500px; height 300px; margin: 0 0 20px  0; border: solid 1px #999; overflow-y: scroll;')
+      .row-fluid
+        .span12
 
-    form.content-form
-      .controls
-        input.data#data(style='width:350px;')
-        input.send#send(type='submit', value='send')
-    #player
+      .row-fluid
+        .span12
+
+      .row-fluid
+        .span12
+
+      .row-fluid
+        .span1
+          h5#userlist Users:
+          #users
+
+        .span2
+          h5#playlist Play list:
+          table#queue.table.table-striped
+
+        .span4
+          #convowrap.bs-docs-example
+            #convo
+
+          form.content-form
+            .controls
+              input.data#data
+              input.send.btn.btn-info#send(type='submit', value='send')
+
+        .span5
+          #player

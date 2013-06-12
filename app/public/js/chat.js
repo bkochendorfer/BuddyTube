@@ -37,6 +37,7 @@ window.onload = function() {
   // Add chat to the list.
   var updateChat = function (username, data) {
     $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
+    $('#convo').scrollTop($('#convo').height());
   };
 
 
@@ -51,9 +52,9 @@ window.onload = function() {
 
 
   // Update the list of queued videos.
-  var updatePlaylist = function(videoIds) {
-    var playListMarkup = $.map(videoIds, function(videoId) {
-      return '<div>' + videoId + '</div>';
+  var updatePlaylist = function(videoData) {
+    var playListMarkup = $.map(videoData, function(videoData) {
+      return '<tr>' + '<td>' + videoData['title'] + '</td>' + '</tr>';
     }).join('');
 
     $("#queue").html(playListMarkup);
