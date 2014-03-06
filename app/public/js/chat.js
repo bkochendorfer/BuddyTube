@@ -48,21 +48,23 @@ window.onload = function() {
 
   // Update the list of currently connected users.
   var updateUsers = function(usernames) {
-    var userListMarkup = $.map(usernames, function(username) {
-      return '<div>' + username + '</div>';
-    }).join('');
-
-    $('#users').html(userListMarkup);
+    $('#users').text('');
+    $.each(usernames, function(i, username) {
+      $('#users').append($('<div>').text(username));
+    });
   };
 
 
   // Update the list of queued videos.
   var updatePlaylist = function(videoData) {
-    var playListMarkup = $.map(videoData, function(videoData) {
-      return '<tr>' + '<td>' + videoData['title'] + '</td>' + '</tr>';
-    }).join('');
-
-    $("#queue").html(playListMarkup);
+    $("#queue").text('');
+    $.each(videoData, function(i, videoData) {
+      $("#queue").append(
+        $('<tr>').append(
+          $('<td>').text(videoData['title'])
+        )
+      )
+    });
   };
 
 
