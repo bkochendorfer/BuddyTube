@@ -36,7 +36,12 @@ window.onload = function() {
 
   // Add chat to the list.
   var updateChat = function (username, data) {
-    $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
+    var newMessage = $('<span>')
+      .text(data)
+      .prepend($('<b>').text(username + ": "))
+      .append($('<br>'));
+
+    $('#convo').append(newMessage);
     $('#convo').scrollTop($('#convo').height());
   };
 
