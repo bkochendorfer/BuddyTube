@@ -41,25 +41,28 @@ window.onload = function() {
       .prepend($('<b>').text(username + ": "))
       .append($('<br>'));
 
-    $('#convo').append(newMessage);
-    $('#convo').scrollTop($('#convo').height());
+    var convo = $('#convo');
+    convo.append(newMessage);
+    convo.scrollTop(convo.height());
   };
 
 
   // Update the list of currently connected users.
   var updateUsers = function(usernames) {
-    $('#users').text('');
+    var users = $('#users');
+    users.text('');
     $.each(usernames, function(i, username) {
-      $('#users').append($('<div>').text(username));
+      users.append($('<div>').text(username));
     });
   };
 
 
   // Update the list of queued videos.
   var updatePlaylist = function(videoData) {
-    $("#queue").text('');
+    var queue = $("#queue");
+    queue.text('');
     $.each(videoData, function(i, videoData) {
-      $("#queue").append(
+      queue.append(
         $('<tr>').append(
           $('<td>').text(videoData['title'])
         )
