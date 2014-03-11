@@ -36,28 +36,34 @@ window.onload = function() {
 
   // Add chat to the list.
   var updateChat = function (username, data) {
-    $('#convo').append('<b>' + username + ':</b> ' + data + '<br>');
-    $('#convo').scrollTop($('#convo').height());
+    var convo = $('#convo');
+    var newMessage = $('<span>')
+      .text(data)
+      .prepend($('<b>').text(username + ": "))
+      .append($('<br>'));
+
+    convo.append(newMessage);
+    convo.scrollTop(convo.height());
   };
 
 
   // Update the list of currently connected users.
   var updateUsers = function(usernames) {
-    var userListMarkup = $.map(usernames, function(username) {
-      return '<div>' + username + '</div>';
-    }).join('');
-
-    $('#users').html(userListMarkup);
+    $('#users').html(
+      $.map(usernames, function(username) {
+        return $('<div>').text(username)[0].outerHTML;
+      }).join('')
+    );
   };
 
 
   // Update the list of queued videos.
   var updatePlaylist = function(videoData) {
-    var playListMarkup = $.map(videoData, function(videoData) {
-      return '<tr>' + '<td>' + videoData['title'] + '</td>' + '</tr>';
-    }).join('');
-
-    $("#queue").html(playListMarkup);
+    $('#queue').html(
+      $.map(videoData, function(videoData) {
+        return $('<tr>').append($('<td>').text(videoData['title']))[0].outerHTML;
+      }).join('')
+    );
   };
 
 
