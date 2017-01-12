@@ -10,7 +10,7 @@
     "underscore": "~1.4.1",
     "socket.io": "*",
     "get-youtube-id": "*",
-    "youtube-feeds": "*"
+    "youtube-node": "^1.3.0"
   },
   "repository": "",
   "author": "",

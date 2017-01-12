@@ -1,6 +1,9 @@
 express       = require 'express'
 getYouTubeID  = require 'get-youtube-id'
-youtubeData   = require 'youtube-feeds'
+
+YouTube = require('youtube-node');
+youtube = new YouTube();
+youtube.setKey("AIzaSyAn_Oi8WQCLYtoEB5Ec6vFzuFmCE1WWCk8")
 
 {detect, map, isEmpty, without} = require 'underscore'
 
@@ -147,12 +150,14 @@ class ConnectionHandler
   addVideo: (video) =>
     videoId = getYouTubeID(video)
 
-    # Get song title and other data from the Choob.
-    youtubeData.video videoId, (err, songData) =>
-      playlist.push({id : videoId, title: songData.title})
+    youtube.getById videoId, (err, data) =>
+      songData = data.items[0]
+      songTitle = songData.snippet.title
+
+      playlist.push({id: videoId, title: songTitle})
       @emitToAll 'updatePlaylist', playlist
-      @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{songData.title} to the playlist"
-      @emitToMyself 'updateChat', 'Playlist', "You added #{songData.title} to the playlist"
+      @emitToOthers 'updateChat', 'Playlist', "#{@username} added #{songTitle} to the playlist"
+      @emitToMyself 'updateChat', 'Playlist', "You added #{songTitle} to the playlist"
 
 
   # A new chat has been posted in the ol' BuddyChoob.
